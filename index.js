@@ -1,4 +1,3 @@
-console.log("[Message Rewind] Loaded");
 import { getContext, extension_settings } from "../../extensions.js";
 import { saveChat } from "../../script.js";
 
@@ -36,14 +35,12 @@ function injectRewindButtons() {
         messageBlocks.forEach((block) => {
             if (block.querySelector(".rewind-btn-custom")) return;
 
-            // Find the ID from the sibling .mesIDDisplay
             const idElement = block.parentElement.querySelector(".mesIDDisplay");
             if (!idElement) return;
 
             const messageId = parseInt(idElement.textContent.replace("#", ""), 10);
             if (isNaN(messageId)) return;
 
-            // Create bottom toolbar if missing
             let bottomBar = block.querySelector(".mes-bottom-toolbar");
             if (!bottomBar) {
                 bottomBar = document.createElement("div");
@@ -93,17 +90,23 @@ function injectRewindButtons() {
 }
 
 jQuery(async () => {
-    console.log("[Message Rewind] Extension initialized.");
+    console.log("[Message Rewind] Loaded");
 
-    const chatContainer = document.getElementById("chat");
+    function tryAttachObserver() {
+        const chatContainer = document.getElementById("chat");
+        if (!chatContainer) {
+            setTimeout(tryAttachObserver, 300);
+            return;
+        }
 
-    if (chatContainer) {
         const observer = new MutationObserver(() => {
             setTimeout(injectRewindButtons, 0);
         });
 
         observer.observe(chatContainer, { childList: true, subtree: true });
+
+        setTimeout(injectRewindButtons, 300);
     }
 
-    setTimeout(injectRewindButtons, 800);
+    tryAttachObserver();
 });
