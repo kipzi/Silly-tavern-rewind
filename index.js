@@ -147,7 +147,7 @@ function injectRewindButtons() {
 
             const rewindButton = document.createElement("button");
             rewindButton.className = "rewind-btn-custom";
-            rewindButton.innerHTML = '<i class="fa-solid fa-angles-left"></i>';
+           rewindButton.innerHTML = '<i class="fa-solid fa-angles-left" style="margin: 10px;"></i>';
             rewindButton.title = "Rewind to this message";
             rewindButton.style.background = "transparent";
             rewindButton.style.border = "none";
