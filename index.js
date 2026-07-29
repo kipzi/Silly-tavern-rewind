@@ -26,6 +26,31 @@ async function performRewind(messageIndex) {
     }
 }
 
+/**
+ * Calculates the relative luminance of an element's background color 
+ * to automatically adapt the icon color for light or dark themes.
+ */
+function getAdaptiveColor(element) {
+    let current = element;
+    while (current && current !== document.body) {
+        const bg = window.getComputedStyle(current).backgroundColor;
+        if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') {
+            const rgb = bg.match(/\d+/g);
+            if (rgb && rgb.length >= 3) {
+                const r = parseInt(rgb[0], 10);
+                const g = parseInt(rgb[1], 10);
+                const b = parseInt(rgb[2], 10);
+                // Standard perceived luminance formula
+                const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+                // If the background is bright/light, return a dark grey icon; otherwise light grey
+                return luminance > 0.5 ? '#404040' : '#b0b0b0';
+            }
+        }
+        current = current.parentElement;
+    }
+    return '#b0b0b0'; // Fallback default
+}
+
 function injectRewindButtons() {
     try {
         const messageBlocks = document.querySelectorAll(".mes");
@@ -56,6 +81,9 @@ function injectRewindButtons() {
                 block.appendChild(bottomBar);
             }
 
+            const baseColor = getAdaptiveColor(block);
+            const hoverColor = baseColor === '#404040' ? '#000000' : '#ffffff';
+
             const rewindButton = document.createElement("button");
             rewindButton.className = "rewind-btn-custom";
             rewindButton.innerHTML = '<i class="fa-solid fa-angles-left"></i>';
@@ -63,21 +91,20 @@ function injectRewindButtons() {
             rewindButton.style.background = "transparent";
             rewindButton.style.border = "none";
             rewindButton.style.boxShadow = "none";
-            rewindButton.style.color = "#b0b0b0";
+            rewindButton.style.color = baseColor;
             rewindButton.style.padding = "4px";
             rewindButton.style.fontSize = "0.85rem";
             rewindButton.style.cursor = "pointer";
             rewindButton.style.transition = "color 0.2s ease";
-            // Pushes the button to the far left with a 10px margin
             rewindButton.style.marginRight = "auto";
             rewindButton.style.marginLeft = "10px";
 
             rewindButton.addEventListener("mouseenter", () => {
-                rewindButton.style.color = "#ffffff";
+                rewindButton.style.color = hoverColor;
             });
 
             rewindButton.addEventListener("mouseleave", () => {
-                rewindButton.style.color = "#b0b0b0";
+                rewindButton.style.color = baseColor;
             });
 
             rewindButton.addEventListener("click", (e) => {
