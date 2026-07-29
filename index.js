@@ -54,23 +54,21 @@ function injectRewindButtons() {
 
             const rewindButton = document.createElement("button");
             rewindButton.className = "rewind-btn-custom";
-            rewindButton.innerHTML = '<i class="fa-solid fa-history"></i> Rewind';
-            rewindButton.style.background = "rgba(255, 255, 255, 0.05)";
-            rewindButton.style.border = "1px solid rgba(255, 255, 255, 0.1)";
+            rewindButton.innerHTML = '<i class="fa-solid fa-clock-rotate-left"></i>';
+            rewindButton.title = "Rewind to this message";
+            rewindButton.style.background = "transparent";
+            rewindButton.style.border = "none";
             rewindButton.style.color = "#b0b0b0";
-            rewindButton.style.padding = "3px 8px";
-            rewindButton.style.borderRadius = "8px";
-            rewindButton.style.fontSize = "0.75rem";
+            rewindButton.style.padding = "4px";
+            rewindButton.style.fontSize = "0.85rem";
             rewindButton.style.cursor = "pointer";
-            rewindButton.style.transition = "all 0.2s ease";
+            rewindButton.style.transition = "color 0.2s ease";
 
             rewindButton.addEventListener("mouseenter", () => {
-                rewindButton.style.background = "rgba(255, 255, 255, 0.12)";
                 rewindButton.style.color = "#ffffff";
             });
 
             rewindButton.addEventListener("mouseleave", () => {
-                rewindButton.style.background = "rgba(255, 255, 255, 0.05)";
                 rewindButton.style.color = "#b0b0b0";
             });
 
