@@ -1,6 +1,5 @@
-import { getContext, extension_settings } from "../../../extensions.js";
-import { saveChat } from "../../../script.js";
-import { eventSource, event_types } from "../../../script.js";
+import { getContext, extension_settings } from "../../extensions.js";
+import { saveChat } from "../../script.js";
 
 const extensionName = "st-message-rewind";
 const DEFAULT_SETTINGS = { requireConfirmation: true };
@@ -73,19 +72,16 @@ function injectRewindButtons() {
 }
 
 jQuery(async () => {
-    console.log("[Message Rewind] Active and listening for chat events.");
+    console.log("[Message Rewind] Loaded successfully with corrected paths.");
 
-    // Hook directly into SillyTavern's native event emitter for message renders
-    if (typeof eventSource !== 'undefined' && event_types) {
-        eventSource.on(event_types.MESSAGE_RENDERED, () => {
-            setTimeout(injectRewindButtons, 50);
-        });
-        eventSource.on(event_types.CHAT_CHANGED, () => {
-            setTimeout(injectRewindButtons, 100);
-        });
+    const observer = new MutationObserver(() => {
+        injectRewindButtons();
+    });
+
+    const chatContainer = document.getElementById('chat');
+    if (chatContainer) {
+        observer.observe(chatContainer, { childList: true, subtree: true });
     }
 
-    // Fallback interval check to catch any missed states
-    setInterval(injectRewindButtons, 1000);
     setTimeout(injectRewindButtons, 500);
 });
