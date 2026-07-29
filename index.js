@@ -43,7 +43,7 @@ function injectRewindButtons() {
                 bottomBar = document.createElement("div");
                 bottomBar.className = "mes-bottom-toolbar";
                 bottomBar.style.display = "flex";
-                bottomBar.style.justifyContent = "flex-start";
+                bottomBar.style.justifyContent = "flex-end";
                 bottomBar.style.alignItems = "center";
                 bottomBar.style.gap = "8px";
                 bottomBar.style.marginTop = "10px";
@@ -53,12 +53,12 @@ function injectRewindButtons() {
                 bottomBar.style.position = "relative";
                 block.appendChild(bottomBar);
             } else {
-                bottomBar.style.setProperty("justify-content", "flex-start", "important");
                 block.appendChild(bottomBar);
             }
 
             const rewindButton = document.createElement("button");
             rewindButton.className = "rewind-btn-custom";
+            // fa-angles-left is the standard FontAwesome icon for double arrows pointing left (<<)
             rewindButton.innerHTML = '<i class="fa-solid fa-angles-left"></i>';
             rewindButton.title = "Rewind to this message";
             rewindButton.style.background = "transparent";
@@ -69,8 +69,6 @@ function injectRewindButtons() {
             rewindButton.style.fontSize = "0.85rem";
             rewindButton.style.cursor = "pointer";
             rewindButton.style.transition = "color 0.2s ease";
-            rewindButton.style.marginLeft = "0px";
-            rewindButton.style.marginRight = "auto";
 
             rewindButton.addEventListener("mouseenter", () => {
                 rewindButton.style.color = "#ffffff";
