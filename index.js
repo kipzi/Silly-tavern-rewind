@@ -1,5 +1,6 @@
 import { getContext, extension_settings } from "../../../extensions.js";
 import { saveChat } from "../../../script.js";
+import { eventSource, event_types } from "../../../script.js";
 
 const extensionName = "st-message-rewind";
 const DEFAULT_SETTINGS = { requireConfirmation: true };
@@ -67,24 +68,24 @@ function injectRewindButtons() {
         });
 
         buttonRow.appendChild(rewindButton);
-
-        // Append safely to the very end of the .mes card container
         block.appendChild(buttonRow);
     });
 }
 
 jQuery(async () => {
-    console.log("[Message Rewind] Initialized successfully.");
+    console.log("[Message Rewind] Active and listening for chat events.");
 
-    // Continuously check for new or re-rendered messages
-    const observer = new MutationObserver(() => {
-        injectRewindButtons();
-    });
-
-    const chatContainer = document.getElementById('chat');
-    if (chatContainer) {
-        observer.observe(chatContainer, { childList: true, subtree: true });
+    // Hook directly into SillyTavern's native event emitter for message renders
+    if (typeof eventSource !== 'undefined' && event_types) {
+        eventSource.on(event_types.MESSAGE_RENDERED, () => {
+            setTimeout(injectRewindButtons, 50);
+        });
+        eventSource.on(event_types.CHAT_CHANGED, () => {
+            setTimeout(injectRewindButtons, 100);
+        });
     }
 
+    // Fallback interval check to catch any missed states
+    setInterval(injectRewindButtons, 1000);
     setTimeout(injectRewindButtons, 500);
 });
