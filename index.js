@@ -1,22 +1,19 @@
-/**
- * Perform the message rewind action.
- * @param {number} messageIndex - The chat array index to rewind to
- */
+const extensionName = "st-message-rewind";
+const DEFAULT_SETTINGS = { requireConfirmation: true };
+
 async function performRewind(messageIndex) {
     try {
         const context = SillyTavern.getContext();
         const chat = context.chat;
 
-        if (!chat || messageIndex < 0 || messageIndex >= chat.length) return;
+        if (messageIndex < 0 || messageIndex >= chat.length) return;
 
-        const extensionName = "st-message-rewind";
-        const DEFAULT_SETTINGS = { requireConfirmation: true };
         const settings = (context.extensionSettings && context.extensionSettings[extensionName]) || DEFAULT_SETTINGS;
 
         if (settings.requireConfirmation) {
-            const snippet = chat[messageIndex].mes ? chat[messageIndex].mes.slice(0, 40) : "";
+            const snippet = chat[messageIndex].mes.slice(0, 40);
             const confirmed = window.confirm(
-                `Are you sure you want to rewind to this message?\n\n"${snippet}"\n\nAll messages underneath this one will be permanently deleted.`
+                `Rewind to this message?\n\n"${snippet}"\n\nMessages after this point will be removed.`
             );
             if (!confirmed) return;
         }
@@ -25,25 +22,20 @@ async function performRewind(messageIndex) {
         await context.saveChat();
         context.printMessages();
     } catch (err) {
-        console.error("[Message Rewind] Rewind Error:", err);
+        console.error("[Message Rewind] Error:", err);
     }
 }
 
-/**
- * Scan the DOM and inject Rewind buttons onto message cards.
- */
 function injectRewindButtons() {
     try {
         const messageBlocks = document.querySelectorAll(".mes");
-        if (messageBlocks.length === 0) return;
 
         messageBlocks.forEach((block) => {
             if (block.querySelector(".rewind-btn-custom")) return;
 
-            const mesIdStr = block.getAttribute("mesid") || block.getAttribute("data-mesid");
-            if (mesIdStr === "" || mesIdStr === null) return;
-            
-            const messageId = parseInt(mesIdStr, 10);
+            const messageIdStr = block.getAttribute("mesid") || block.getAttribute("data-mesid");
+            if (messageIdStr === null) return;
+            const messageId = parseInt(messageIdStr, 10);
             if (isNaN(messageId)) return;
 
             let bottomBar = block.querySelector(".mes-bottom-toolbar");
@@ -57,8 +49,6 @@ function injectRewindButtons() {
                 bottomBar.style.marginTop = "10px";
                 bottomBar.style.paddingTop = "6px";
                 bottomBar.style.borderTop = "1px solid rgba(255, 255, 255, 0.05)";
-                bottomBar.style.width = "100%";
-                bottomBar.style.position = "relative";
                 block.appendChild(bottomBar);
             }
 
@@ -96,40 +86,24 @@ function injectRewindButtons() {
     }
 }
 
-/**
- * Initialize the extension immediately upon script load.
- */
-(function () {
-    console.log("[Message Rewind] Loaded successfully");
+jQuery(async () => {
+    console.log("[Message Rewind] Loaded");
 
-    // Expose globally so it can be tested from the console without ReferenceErrors
-    window.injectRewindButtons = injectRewindButtons;
+    function tryAttachObserver() {
+        const chatContainer = document.getElementById("chat");
+        if (!chatContainer) {
+            setTimeout(tryAttachObserver, 300);
+            return;
+        }
 
-    const context = SillyTavern.getContext();
-
-    // 1. Hook into SillyTavern's native event emitters if available
-    if (context && context.eventSource && context.event_types) {
-        context.eventSource.on(context.event_types.CHAT_CHANGED, () => setTimeout(injectRewindButtons, 100));
-        context.eventSource.on(context.event_types.MESSAGE_RECEIVED, () => setTimeout(injectRewindButtons, 100));
-        context.eventSource.on(context.event_types.MESSAGE_SENT, () => setTimeout(injectRewindButtons, 100));
-    }
-
-    // 2. Continuous DOM observer fallback to catch UI themes/switches
-    const attachObserver = () => {
-        const chatContainer = document.getElementById("chat") || document.body;
         const observer = new MutationObserver(() => {
-            injectRewindButtons();
+            setTimeout(injectRewindButtons, 0);
         });
-        observer.observe(chatContainer, { childList: true, subtree: true });
-    };
 
-    if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", attachObserver);
-    } else {
-        attachObserver();
+        observer.observe(chatContainer, { childList: true, subtree: true });
+
+        setTimeout(injectRewindButtons, 300);
     }
 
-    // 3. Staggered initial injection passes
-    setTimeout(injectRewindButtons, 300);
-    setTimeout(injectRewindButtons, 1000);
-})();
+    tryAttachObserver();
+});
