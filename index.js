@@ -12,64 +12,80 @@ async function performRewind(messageIndex) {
 
     if (!confirmed) return;
 
-    // Truncate chat array and update UI
     chat.splice(messageIndex + 1);
     await saveChat();
     context.printMessages();
 }
 
-function addRewindButtons() {
+function injectRewindButtons() {
     const messageBlocks = document.querySelectorAll('.mes');
 
     messageBlocks.forEach((block) => {
-        // Prevent duplicate buttons
+        // Prevent duplicate injection
         if (block.querySelector('.rewind-row')) return;
 
-        const messageId = parseInt(block.getAttribute('mesid'), 10);
+        const messageIdStr = block.getAttribute('mesid') || block.getAttribute('data-mesid');
+        if (messageIdStr === null) return;
+        const messageId = parseInt(messageIdStr, 10);
         if (isNaN(messageId)) return;
 
-        // Create a dedicated wrapper row to sit cleanly below the message
+        // Create a styled container matching your dark glass theme
         const buttonRow = document.createElement('div');
         buttonRow.className = 'rewind-row';
         buttonRow.style.display = 'flex';
-        buttonRow.style.justifyContent='flex-end';
-        buttonRow.style.marginTop = '4px';
-        buttonRow.style.marginBottom = '8px';
-        buttonRow.style.opacity = '0.6';
-        buttonRow.style.transition = 'opacity 0.2s ease';
-
-        buttonRow.addEventListener('mouseenter', () => buttonRow.style.opacity = '1');
-        buttonRow.addEventListener('mouseleave', () => buttonRow.style.opacity = '0.6');
+        buttonRow.style.justifyContent = 'flex-end';
+        buttonRow.style.marginTop = '12px';
+        buttonRow.style.paddingTop = '8px';
+        buttonRow.style.borderTop = '1px solid rgba(255, 255, 255, 0.05)';
 
         const rewindButton = document.createElement('button');
-        rewindButton.className = 'menu_button menu_button_icon';
         rewindButton.innerHTML = '<i class="fa-solid fa-history"></i> Rewind to here';
-        rewindButton.style.padding = '2px 8px';
-        rewindButton.style.fontSize = '0.8rem';
+        rewindButton.style.background = 'rgba(255, 255, 255, 0.05)';
+        rewindButton.style.border = '1px solid rgba(255, 255, 255, 0.1)';
+        rewindButton.style.color = '#b0b0b0';
+        rewindButton.style.padding = '4px 10px';
+        rewindButton.style.borderRadius = '10px';
+        rewindButton.style.fontSize = '0.75rem';
         rewindButton.style.cursor = 'pointer';
+        rewindButton.style.transition = 'all 0.2s ease';
 
-        rewindButton.addEventListener('click', () => performRewind(messageId));
+        rewindButton.addEventListener('mouseenter', () => {
+            rewindButton.style.background = 'rgba(255, 255, 255, 0.12)';
+            rewindButton.style.color = '#ffffff';
+        });
+        rewindButton.addEventListener('mouseleave', () => {
+            rewindButton.style.background = 'rgba(255, 255, 255, 0.05)';
+            rewindButton.style.color = '#b0b0b0';
+        });
+
+        rewindButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            performRewind(messageId);
+        });
 
         buttonRow.appendChild(rewindButton);
 
-        // Append directly to the bottom of the .mes block
-        block.appendChild(buttonRow);
+        // Append right into the message block safely below the text
+        const mesText = block.querySelector('.mes_text');
+        if (mesText) {
+            mesText.after(buttonRow);
+        } else {
+            block.appendChild(buttonRow);
+        }
     });
 }
 
 jQuery(async () => {
-    const observer = new MutationObserver((mutations) => {
-        for (const mutation of mutations) {
-            if (mutation.addedNodes.length) {
-                addRewindButtons();
-            }
-        }
+    console.log("[Message Rewind] Loaded with custom theme support.");
+
+    const chatObserver = new MutationObserver(() => {
+        injectRewindButtons();
     });
 
     const chatContainer = document.getElementById('chat');
     if (chatContainer) {
-        observer.observe(chatContainer, { childList: true, subtree: true });
+        chatObserver.observe(chatContainer, { childList: true, subtree: true });
     }
 
-    addRewindButtons();
+    setTimeout(injectRewindButtons, 800);
 });
