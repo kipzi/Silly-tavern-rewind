@@ -72,7 +72,7 @@ function injectRewindButtons() {
 }
 
 jQuery(async () => {
-    console.log("[Message Rewind] Loaded successfully with corrected paths.");
+    console.log("[Message Rewind] Extension initialized.");
 
     const observer = new MutationObserver(() => {
         injectRewindButtons();
