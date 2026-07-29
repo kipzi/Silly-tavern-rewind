@@ -58,7 +58,6 @@ function injectRewindButtons() {
 
             const rewindButton = document.createElement("button");
             rewindButton.className = "rewind-btn-custom";
-            // fa-angles-left is the standard FontAwesome icon for double arrows pointing left (<<)
             rewindButton.innerHTML = '<i class="fa-solid fa-angles-left"></i>';
             rewindButton.title = "Rewind to this message";
             rewindButton.style.background = "transparent";
@@ -69,6 +68,9 @@ function injectRewindButtons() {
             rewindButton.style.fontSize = "0.85rem";
             rewindButton.style.cursor = "pointer";
             rewindButton.style.transition = "color 0.2s ease";
+            // Pushes the button to the far left with a 10px margin
+            rewindButton.style.marginRight = "auto";
+            rewindButton.style.marginLeft = "10px";
 
             rewindButton.addEventListener("mouseenter", () => {
                 rewindButton.style.color = "#ffffff";
