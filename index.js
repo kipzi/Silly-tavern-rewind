@@ -13,7 +13,6 @@ async function performRewind(messageIndex) {
         if (settings.requireConfirmation) {
             const snippet = chat[messageIndex].mes ? chat[messageIndex].mes.slice(0, 80) : "";
             
-            // Custom aesthetic modal confirmation dialog
             const confirmed = await new Promise((resolve) => {
                 const overlay = document.createElement("div");
                 overlay.style.position = "fixed";
@@ -63,7 +62,6 @@ async function performRewind(messageIndex) {
                 overlay.appendChild(modal);
                 document.body.appendChild(overlay);
 
-                // Trigger smooth fade-in animation
                 requestAnimationFrame(() => {
                     overlay.style.opacity = "1";
                     modal.style.transform = "scale(1)";
@@ -132,7 +130,7 @@ function injectRewindButtons() {
                 bottomBar = document.createElement("div");
                 bottomBar.className = "mes-bottom-toolbar";
                 bottomBar.style.display = "flex";
-                bottomBar.style.justifyContent = "flex-end";
+                bottomBar.style.justifyContent = "flex-start"; // Forces left alignment
                 bottomBar.style.alignItems = "center";
                 bottomBar.style.gap = "8px";
                 bottomBar.style.marginTop = "10px";
@@ -142,6 +140,7 @@ function injectRewindButtons() {
                 bottomBar.style.position = "relative";
                 block.appendChild(bottomBar);
             } else {
+                bottomBar.style.setProperty("justify-content", "flex-start", "important");
                 block.appendChild(bottomBar);
             }
 
@@ -160,8 +159,9 @@ function injectRewindButtons() {
             rewindButton.style.fontSize = "0.85rem";
             rewindButton.style.cursor = "pointer";
             rewindButton.style.transition = "color 0.2s ease";
-            rewindButton.style.marginRight = "auto";
+            // Explicitly pin to the left with your 10px offset, clearing any auto margins
             rewindButton.style.marginLeft = "10px";
+            rewindButton.style.marginRight = "0px";
 
             rewindButton.addEventListener("mouseenter", () => {
                 rewindButton.style.color = hoverColor;
