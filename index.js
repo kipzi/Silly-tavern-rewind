@@ -1,5 +1,5 @@
 import { getContext, extension_settings } from "../../extensions.js";
-import { saveChat } from "../../script.js";
+import { saveChat, eventSource, event_types } from "../../script.js";
 
 const extensionName = "st-message-rewind";
 const DEFAULT_SETTINGS = { requireConfirmation: true };
@@ -15,7 +15,6 @@ async function performRewind(messageIndex) {
 
         if (settings.requireConfirmation) {
             const snippet = chat[messageIndex].mes.slice(0, 40);
-            // This is the real confirmation dialog with OK and Cancel buttons
             const confirmed = window.confirm(
                 `Are you sure you want to rewind to this message?\n\n"${snippet}"\n\nAll messages underneath this one will be permanently deleted.`
             );
@@ -33,6 +32,7 @@ async function performRewind(messageIndex) {
 function injectRewindButtons() {
     try {
         const messageBlocks = document.querySelectorAll(".mes");
+        if (messageBlocks.length === 0) return;
 
         messageBlocks.forEach((block) => {
             if (block.querySelector(".rewind-btn-custom")) return;
@@ -93,24 +93,23 @@ function injectRewindButtons() {
     }
 }
 
+// 1. Listen natively to SillyTavern chat events so buttons inject immediately on load/switch
+eventSource.on(event_types.CHAT_CHANGED, () => setTimeout(injectRewindButtons, 100));
+eventSource.on(event_types.MESSAGE_RECEIVED, () => setTimeout(injectRewindButtons, 100));
+eventSource.on(event_types.MESSAGE_SENT, () => setTimeout(injectRewindButtons, 100));
+
+// 2. Safe document-level observer fallback
 jQuery(async () => {
     console.log("[Message Rewind] Loaded successfully");
 
-    function tryAttachObserver() {
-        const chatContainer = document.getElementById("chat");
-        if (!chatContainer) {
-            setTimeout(tryAttachObserver, 300);
-            return;
-        }
+    const observer = new MutationObserver(() => {
+        injectRewindButtons();
+    });
 
-        const observer = new MutationObserver(() => {
-            setTimeout(injectRewindButtons, 50);
-        });
+    observer.observe(document.body, { childList: true, subtree: true });
 
-        observer.observe(chatContainer, { childList: true, subtree: true });
-
-        setTimeout(injectRewindButtons, 300);
-    }
-
-    tryAttachObserver();
+    // Staggered checks for initial page load
+    injectRewindButtons();
+    setTimeout(injectRewindButtons, 500);
+    setTimeout(injectRewindButtons, 1500);
 });
