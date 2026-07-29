@@ -15,6 +15,7 @@ async function performRewind(messageIndex) {
 
         if (settings.requireConfirmation) {
             const snippet = chat[messageIndex].mes.slice(0, 40);
+            // Real confirmation dialog with OK and Cancel buttons
             const confirmed = window.confirm(
                 `Are you sure you want to rewind to this message?\n\n"${snippet}"\n\nAll messages underneath this one will be permanently deleted.`
             );
@@ -93,20 +94,25 @@ function injectRewindButtons() {
     }
 }
 
-// 1. Listen natively to SillyTavern chat events so buttons inject immediately on load/switch
+// 1. Expose functions globally so you can test them in the browser console
+window["st-message-rewind-loaded"] = true;
+window.injectRewindButtons = injectRewindButtons;
+
+// 2. Listen natively to SillyTavern chat events so buttons inject immediately on load/switch
 eventSource.on(event_types.CHAT_CHANGED, () => setTimeout(injectRewindButtons, 100));
 eventSource.on(event_types.MESSAGE_RECEIVED, () => setTimeout(injectRewindButtons, 100));
 eventSource.on(event_types.MESSAGE_SENT, () => setTimeout(injectRewindButtons, 100));
 
-// 2. Safe document-level observer fallback
+// 3. Safe document-level observer fallback
 jQuery(async () => {
     console.log("[Message Rewind] Loaded successfully");
 
+    const chatContainer = document.getElementById("chat") || document.body;
     const observer = new MutationObserver(() => {
         injectRewindButtons();
     });
 
-    observer.observe(document.body, { childList: true, subtree: true });
+    observer.observe(chatContainer, { childList: true, subtree: true });
 
     // Staggered checks for initial page load
     injectRewindButtons();
