@@ -1,0 +1,7 @@
+{
+  "name": "Message Rewind",
+  "display_name": "Message Rewind Button",
+  "version": "1.0.0",
+  "author": "Custom",
+  "description": "Adds a rewind button under every message to delete all subsequent messages with confirmation."
+}
