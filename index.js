@@ -25,7 +25,7 @@ async function performRewind(messageIndex) {
         await saveChat();
         context.printMessages();
     } catch (err) {
-        console.error("[Message Rewind] Error:", err);
+        console.error("[Message Rewind] Rewind Error:", err);
     }
 }
 
@@ -37,7 +37,6 @@ function injectRewindButtons() {
             if (block.querySelector(".rewind-btn-custom")) return;
 
             const mesIdStr = block.getAttribute("mesid") || block.getAttribute("data-mesid");
-            // Check strictly for null or empty string so '0' is allowed through
             if (mesIdStr === "" || mesIdStr === null) return;
             
             const messageId = parseInt(mesIdStr, 10);
@@ -54,6 +53,8 @@ function injectRewindButtons() {
                 bottomBar.style.marginTop = "10px";
                 bottomBar.style.paddingTop = "6px";
                 bottomBar.style.borderTop = "1px solid rgba(255, 255, 255, 0.05)";
+                bottomBar.style.width = "100%";
+                bottomBar.style.position = "relative";
                 block.appendChild(bottomBar);
             }
 
@@ -92,7 +93,7 @@ function injectRewindButtons() {
 }
 
 jQuery(async () => {
-    console.log("[Message Rewind] Loaded");
+    console.log("[Message Rewind] Loaded successfully");
 
     function tryAttachObserver() {
         const chatContainer = document.getElementById("chat");
@@ -102,7 +103,7 @@ jQuery(async () => {
         }
 
         const observer = new MutationObserver(() => {
-            setTimeout(injectRewindButtons, 0);
+            setTimeout(injectRewindButtons, 50);
         });
 
         observer.observe(chatContainer, { childList: true, subtree: true });
