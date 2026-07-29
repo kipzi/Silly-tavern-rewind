@@ -15,8 +15,9 @@ async function performRewind(messageIndex) {
 
         if (settings.requireConfirmation) {
             const snippet = chat[messageIndex].mes.slice(0, 40);
+            // This is the real confirmation dialog with OK and Cancel buttons
             const confirmed = window.confirm(
-                `Rewind to this message?\n\n"${snippet}"\n\nMessages after this point will be removed.`
+                `Are you sure you want to rewind to this message?\n\n"${snippet}"\n\nAll messages underneath this one will be permanently deleted.`
             );
             if (!confirmed) return;
         }
