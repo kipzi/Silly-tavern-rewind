@@ -2,6 +2,6 @@
   "name": "Message Rewind",
   "display_name": "Message Rewind Button",
   "version": "1.0.0",
-  "author": "Custom",
+  "author": "Kipzi",
   "description": "Adds a rewind button under every message to delete subsequent messages with confirmation."
 }
