@@ -1,9 +1,6 @@
 const extensionName = "st-message-rewind";
 const DEFAULT_SETTINGS = { requireConfirmation: true };
 
-/* -----------------------------
-   REWIND LOGIC
------------------------------ */
 async function performRewind(messageIndex) {
     try {
         const context = SillyTavern.getContext();
@@ -11,9 +8,7 @@ async function performRewind(messageIndex) {
 
         if (messageIndex < 0 || messageIndex >= chat.length) return;
 
-        const settings =
-            (context.extensionSettings && context.extensionSettings[extensionName]) ||
-            DEFAULT_SETTINGS;
+        const settings = (context.extensionSettings && context.extensionSettings[extensionName]) || DEFAULT_SETTINGS;
 
         if (settings.requireConfirmation) {
             const snippet = chat[messageIndex].mes.slice(0, 40);
@@ -31,9 +26,6 @@ async function performRewind(messageIndex) {
     }
 }
 
-/* -----------------------------
-   BUTTON INJECTION
------------------------------ */
 function injectRewindButtons() {
     try {
         const messageBlocks = document.querySelectorAll(".mes");
@@ -41,10 +33,8 @@ function injectRewindButtons() {
         messageBlocks.forEach((block) => {
             if (block.querySelector(".rewind-btn-custom")) return;
 
-            const messageIdStr =
-                block.getAttribute("mesid") || block.getAttribute("data-mesid");
-            if (!messageIdStr) return;
-
+            const messageIdStr = block.getAttribute("mesid") || block.getAttribute("data-mesid");
+            if (messageIdStr === null) return;
             const messageId = parseInt(messageIdStr, 10);
             if (isNaN(messageId)) return;
 
@@ -52,37 +42,36 @@ function injectRewindButtons() {
             if (!bottomBar) {
                 bottomBar = document.createElement("div");
                 bottomBar.className = "mes-bottom-toolbar";
-
                 bottomBar.style.display = "flex";
                 bottomBar.style.justifyContent = "flex-end";
                 bottomBar.style.alignItems = "center";
-                bottomBar.style.gap = "6px";
-                bottomBar.style.marginTop = "8px";
+                bottomBar.style.gap = "8px";
+                bottomBar.style.marginTop = "10px";
                 bottomBar.style.paddingTop = "6px";
                 bottomBar.style.borderTop = "1px solid rgba(255, 255, 255, 0.05)";
-                bottomBar.style.order = "999";
-
                 block.appendChild(bottomBar);
             }
 
             const rewindButton = document.createElement("button");
             rewindButton.className = "rewind-btn-custom";
-            rewindButton.innerHTML = '<i class="fa-solid fa-rotate-left"></i>';
-
-            rewindButton.style.background = "transparent";
-            rewindButton.style.border = "none";
-            rewindButton.style.color = "rgba(255, 255, 255, 0.7)";
-            rewindButton.style.fontSize = "1rem";
+            rewindButton.innerHTML = '<i class="fa-solid fa-history"></i> Rewind';
+            rewindButton.style.background = "rgba(255, 255, 255, 0.05)";
+            rewindButton.style.border = "1px solid rgba(255, 255, 255, 0.1)";
+            rewindButton.style.color = "#b0b0b0";
+            rewindButton.style.padding = "3px 8px";
+            rewindButton.style.borderRadius = "8px";
+            rewindButton.style.fontSize = "0.75rem";
             rewindButton.style.cursor = "pointer";
-            rewindButton.style.padding = "2px 4px";
-            rewindButton.style.transition = "color 0.2s ease";
+            rewindButton.style.transition = "all 0.2s ease";
 
             rewindButton.addEventListener("mouseenter", () => {
+                rewindButton.style.background = "rgba(255, 255, 255, 0.12)";
                 rewindButton.style.color = "#ffffff";
             });
 
             rewindButton.addEventListener("mouseleave", () => {
-                rewindButton.style.color = "rgba(255, 255, 255, 0.7)";
+                rewindButton.style.background = "rgba(255, 255, 255, 0.05)";
+                rewindButton.style.color = "#b0b0b0";
             });
 
             rewindButton.addEventListener("click", (e) => {
@@ -97,56 +86,8 @@ function injectRewindButtons() {
     }
 }
 
-/* -----------------------------
-   SETTINGS PANEL
------------------------------ */
-function registerSettings() {
-    const context = SillyTavern.getContext();
-
-    SillyTavern.addExtensionSettings(extensionName, {
-        name: "Message Rewind Settings",
-        description: "Adds a rewind icon to each message to truncate chat history.",
-        settings: `
-            <div class="inline-drawer">
-                <div class="inline-drawer-toggle inline-drawer-header">
-                    <b>Message Rewind Settings</b>
-                    <div class="inline-drawer-icon fa-solid fa-chevron-down down"></div>
-                </div>
-                <div class="inline-drawer-content" style="display: block;">
-                    <div class="flex-container flexFlowColumn">
-                        <label class="checkbox_label" style="margin: 10px 0; cursor: pointer;">
-                            <input type="checkbox" id="rewind_confirm_toggle" />
-                            <span>Require confirmation dialog before deleting messages</span>
-                        </label>
-                        <small style="color: rgba(255, 255, 255, 0.5);">
-                            Adds a rewind icon to the bottom of every message card.
-                        </small>
-                    </div>
-                </div>
-            </div>
-        `,
-        onload() {
-            const settings =
-                context.extensionSettings[extensionName] || DEFAULT_SETTINGS;
-
-            const toggle = document.getElementById("rewind_confirm_toggle");
-            toggle.checked = settings.requireConfirmation;
-
-            toggle.addEventListener("change", (e) => {
-                context.extensionSettings[extensionName].requireConfirmation =
-                    e.target.checked;
-            });
-        },
-    });
-}
-
-/* -----------------------------
-   INITIALIZATION
------------------------------ */
 jQuery(async () => {
     console.log("[Message Rewind] Loaded");
-
-    registerSettings();
 
     function tryAttachObserver() {
         const chatContainer = document.getElementById("chat");
