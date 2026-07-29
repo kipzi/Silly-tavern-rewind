@@ -31,28 +31,36 @@ function injectRewindButtons() {
         const messageBlocks = document.querySelectorAll('.mes');
 
         messageBlocks.forEach((block) => {
-            if (block.querySelector('.rewind-row')) return;
+            if (block.querySelector('.rewind-btn-custom')) return;
 
             const messageIdStr = block.getAttribute('mesid') || block.getAttribute('data-mesid');
             if (messageIdStr === null) return;
             const messageId = parseInt(messageIdStr, 10);
             if (isNaN(messageId)) return;
 
-            const buttonRow = document.createElement('div');
-            buttonRow.className = 'rewind-row';
-            buttonRow.style.display = 'flex';
-            buttonRow.style.justifyContent = 'flex-end';
-            buttonRow.style.marginTop = '12px';
-            buttonRow.style.paddingTop = '8px';
-            buttonRow.style.borderTop = '1px solid rgba(255, 255, 255, 0.05)';
+            // Create or find a bottom toolbar row to sit near the swipe controls
+            let bottomBar = block.querySelector('.mes-bottom-toolbar');
+            if (!bottomBar) {
+                bottomBar = document.createElement('div');
+                bottomBar.className = 'mes-bottom-toolbar';
+                bottomBar.style.display = 'flex';
+                bottomBar.style.justifyContent = 'flex-end';
+                bottomBar.style.alignItems = 'center';
+                bottomBar.style.gap = '8px';
+                bottomBar.style.marginTop = '10px';
+                bottomBar.style.paddingTop = '6px';
+                bottomBar.style.borderTop = '1px solid rgba(255, 255, 255, 0.05)';
+                block.appendChild(bottomBar);
+            }
 
             const rewindButton = document.createElement('button');
-            rewindButton.innerHTML = '<i class="fa-solid fa-history"></i> Rewind to here';
+            rewindButton.className = 'rewind-btn-custom';
+            rewindButton.innerHTML = '<i class="fa-solid fa-history"></i> Rewind';
             rewindButton.style.background = 'rgba(255, 255, 255, 0.05)';
             rewindButton.style.border = '1px solid rgba(255, 255, 255, 0.1)';
             rewindButton.style.color = '#b0b0b0';
-            rewindButton.style.padding = '4px 10px';
-            rewindButton.style.borderRadius = '10px';
+            rewindButton.style.padding = '3px 8px';
+            rewindButton.style.borderRadius = '8px';
             rewindButton.style.fontSize = '0.75rem';
             rewindButton.style.cursor = 'pointer';
             rewindButton.style.transition = 'all 0.2s ease';
@@ -71,8 +79,7 @@ function injectRewindButtons() {
                 performRewind(messageId);
             });
 
-            buttonRow.appendChild(rewindButton);
-            block.appendChild(buttonRow);
+            bottomBar.appendChild(rewindButton);
         });
     } catch (err) {
         console.error("[Message Rewind] Error injecting buttons:", err);
@@ -80,7 +87,7 @@ function injectRewindButtons() {
 }
 
 jQuery(async () => {
-    console.log("[Message Rewind] Extension script loaded successfully.");
+    console.log("[Message Rewind] Extension initialized.");
 
     const observer = new MutationObserver(() => {
         injectRewindButtons();
