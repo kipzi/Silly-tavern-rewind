@@ -38,7 +38,6 @@ function injectRewindButtons() {
             const messageId = parseInt(messageIdStr, 10);
             if (isNaN(messageId)) return;
 
-            // Use justify-content: flex-start to align the toolbar to the left side
             let bottomBar = block.querySelector(".mes-bottom-toolbar");
             if (!bottomBar) {
                 bottomBar = document.createElement("div");
@@ -54,7 +53,7 @@ function injectRewindButtons() {
                 bottomBar.style.position = "relative";
                 block.appendChild(bottomBar);
             } else {
-                bottomBar.style.justifyContent = "flex-start";
+                bottomBar.style.setProperty("justify-content", "flex-start", "important");
                 block.appendChild(bottomBar);
             }
 
@@ -70,6 +69,8 @@ function injectRewindButtons() {
             rewindButton.style.fontSize = "0.85rem";
             rewindButton.style.cursor = "pointer";
             rewindButton.style.transition = "color 0.2s ease";
+            rewindButton.style.marginLeft = "0px";
+            rewindButton.style.marginRight = "auto";
 
             rewindButton.addEventListener("mouseenter", () => {
                 rewindButton.style.color = "#ffffff";
