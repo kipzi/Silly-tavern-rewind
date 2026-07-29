@@ -1,5 +1,8 @@
-import { getContext } from "../../../extensions.js";
+import { getContext, extension_settings } from "../../../extensions.js";
 import { saveChat } from "../../../script.js";
+
+const extensionName = "st-message-rewind";
+const DEFAULT_SETTINGS = { requireConfirmation: true };
 
 async function performRewind(messageIndex) {
     const context = getContext();
@@ -7,10 +10,12 @@ async function performRewind(messageIndex) {
 
     if (messageIndex < 0 || messageIndex >= chat.length) return;
 
-    const messageSnippet = chat[messageIndex].mes.substring(0, 40) + (chat[messageIndex].mes.length > 40 ? "..." : "");
-    const confirmed = window.confirm(`Are you sure you want to rewind to this message?\n\n"${messageSnippet}"\n\nAll messages underneath this one will be permanently deleted.`);
-
-    if (!confirmed) return;
+    const settings = extension_settings[extensionName] || DEFAULT_SETTINGS;
+    if (settings.requireConfirmation) {
+        const messageSnippet = chat[messageIndex].mes.substring(0, 40) + (chat[messageIndex].mes.length > 40 ? "..." : "");
+        const confirmed = window.confirm(`Are you sure you want to rewind to this message?\n\n"${messageSnippet}"\n\nAll messages underneath this one will be permanently deleted.`);
+        if (!confirmed) return;
+    }
 
     chat.splice(messageIndex + 1);
     await saveChat();
@@ -21,7 +26,6 @@ function injectRewindButtons() {
     const messageBlocks = document.querySelectorAll('.mes');
 
     messageBlocks.forEach((block) => {
-        // Prevent duplicate injection
         if (block.querySelector('.rewind-row')) return;
 
         const messageIdStr = block.getAttribute('mesid') || block.getAttribute('data-mesid');
@@ -29,7 +33,6 @@ function injectRewindButtons() {
         const messageId = parseInt(messageIdStr, 10);
         if (isNaN(messageId)) return;
 
-        // Create a styled container matching your dark glass theme
         const buttonRow = document.createElement('div');
         buttonRow.className = 'rewind-row';
         buttonRow.style.display = 'flex';
@@ -65,27 +68,23 @@ function injectRewindButtons() {
 
         buttonRow.appendChild(rewindButton);
 
-        // Append right into the message block safely below the text
-        const mesText = block.querySelector('.mes_text');
-        if (mesText) {
-            mesText.after(buttonRow);
-        } else {
-            block.appendChild(buttonRow);
-        }
+        // Append safely to the very end of the .mes card container
+        block.appendChild(buttonRow);
     });
 }
 
 jQuery(async () => {
-    console.log("[Message Rewind] Loaded with custom theme support.");
+    console.log("[Message Rewind] Initialized successfully.");
 
-    const chatObserver = new MutationObserver(() => {
+    // Continuously check for new or re-rendered messages
+    const observer = new MutationObserver(() => {
         injectRewindButtons();
     });
 
     const chatContainer = document.getElementById('chat');
     if (chatContainer) {
-        chatObserver.observe(chatContainer, { childList: true, subtree: true });
+        observer.observe(chatContainer, { childList: true, subtree: true });
     }
 
-    setTimeout(injectRewindButtons, 800);
+    setTimeout(injectRewindButtons, 500);
 });
