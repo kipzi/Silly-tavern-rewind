@@ -30,17 +30,19 @@ async function performRewind(messageIndex) {
 
 function injectRewindButtons() {
     try {
-        const messageBlocks = document.querySelectorAll(".mes-block");
+        const messageBlocks = document.querySelectorAll(".mes_block");
 
         messageBlocks.forEach((block) => {
             if (block.querySelector(".rewind-btn-custom")) return;
 
-            const messageIdStr = block.dataset.messageId;
-            if (!messageIdStr) return;
+            // Find the ID from the sibling .mesIDDisplay
+            const idElement = block.parentElement.querySelector(".mesIDDisplay");
+            if (!idElement) return;
 
-            const messageId = parseInt(messageIdStr, 10);
+            const messageId = parseInt(idElement.textContent.replace("#", ""), 10);
             if (isNaN(messageId)) return;
 
+            // Create bottom toolbar if missing
             let bottomBar = block.querySelector(".mes-bottom-toolbar");
             if (!bottomBar) {
                 bottomBar = document.createElement("div");
