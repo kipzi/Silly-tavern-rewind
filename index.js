@@ -102,10 +102,13 @@ function injectRewindButtons() {
 (function () {
     console.log("[Message Rewind] Loaded successfully");
 
+    // Expose globally so it can be tested from the console without ReferenceErrors
+    window.injectRewindButtons = injectRewindButtons;
+
     const context = SillyTavern.getContext();
 
     // 1. Hook into SillyTavern's native event emitters if available
-    if (context.eventSource && context.event_types) {
+    if (context && context.eventSource && context.event_types) {
         context.eventSource.on(context.event_types.CHAT_CHANGED, () => setTimeout(injectRewindButtons, 100));
         context.eventSource.on(context.event_types.MESSAGE_RECEIVED, () => setTimeout(injectRewindButtons, 100));
         context.eventSource.on(context.event_types.MESSAGE_SENT, () => setTimeout(injectRewindButtons, 100));
