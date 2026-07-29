@@ -38,8 +38,6 @@ function injectRewindButtons() {
             const messageId = parseInt(messageIdStr, 10);
             if (isNaN(messageId)) return;
 
-            // Revert back to using the exact .mes-bottom-toolbar structure that worked, 
-            // but append it to the absolute bottom of the message block container.
             let bottomBar = block.querySelector(".mes-bottom-toolbar");
             if (!bottomBar) {
                 bottomBar = document.createElement("div");
@@ -55,13 +53,13 @@ function injectRewindButtons() {
                 bottomBar.style.position = "relative";
                 block.appendChild(bottomBar);
             } else {
-                // Ensure it's physically moved to the very bottom child of the message block
                 block.appendChild(bottomBar);
             }
 
             const rewindButton = document.createElement("button");
             rewindButton.className = "rewind-btn-custom";
-            rewindButton.innerHTML = '<i class="fa-solid fa-clock-rotate-left"></i>';
+            // fa-angles-left is the standard FontAwesome icon for double arrows pointing left (<<)
+            rewindButton.innerHTML = '<i class="fa-solid fa-angles-left"></i>';
             rewindButton.title = "Rewind to this message";
             rewindButton.style.background = "transparent";
             rewindButton.style.border = "none";
