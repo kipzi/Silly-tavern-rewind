@@ -38,12 +38,13 @@ function injectRewindButtons() {
             const messageId = parseInt(messageIdStr, 10);
             if (isNaN(messageId)) return;
 
+            // Use justify-content: flex-start to align the toolbar to the left side
             let bottomBar = block.querySelector(".mes-bottom-toolbar");
             if (!bottomBar) {
                 bottomBar = document.createElement("div");
                 bottomBar.className = "mes-bottom-toolbar";
                 bottomBar.style.display = "flex";
-                bottomBar.style.justifyContent = "flex-end";
+                bottomBar.style.justifyContent = "flex-start";
                 bottomBar.style.alignItems = "center";
                 bottomBar.style.gap = "8px";
                 bottomBar.style.marginTop = "10px";
@@ -53,12 +54,12 @@ function injectRewindButtons() {
                 bottomBar.style.position = "relative";
                 block.appendChild(bottomBar);
             } else {
+                bottomBar.style.justifyContent = "flex-start";
                 block.appendChild(bottomBar);
             }
 
             const rewindButton = document.createElement("button");
             rewindButton.className = "rewind-btn-custom";
-            // fa-angles-left is the standard FontAwesome icon for double arrows pointing left (<<)
             rewindButton.innerHTML = '<i class="fa-solid fa-angles-left"></i>';
             rewindButton.title = "Rewind to this message";
             rewindButton.style.background = "transparent";
