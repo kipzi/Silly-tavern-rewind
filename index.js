@@ -1,21 +1,18 @@
-import { getContext, extension_settings } from "../../extensions.js";
-import { saveChat, eventSource, event_types } from "../../script.js";
-
 const extensionName = "st-message-rewind";
 const DEFAULT_SETTINGS = { requireConfirmation: true };
 
 async function performRewind(messageIndex) {
     try {
-        const context = getContext();
+        // Use the globally exposed ST context instead of fragile relative imports
+        const context = SillyTavern.getContext();
         const chat = context.chat;
 
         if (messageIndex < 0 || messageIndex >= chat.length) return;
 
-        const settings = extension_settings[extensionName] || DEFAULT_SETTINGS;
+        const settings = context.extensionSettings[extensionName] || DEFAULT_SETTINGS;
 
         if (settings.requireConfirmation) {
             const snippet = chat[messageIndex].mes.slice(0, 40);
-            // Real confirmation dialog with OK and Cancel buttons
             const confirmed = window.confirm(
                 `Are you sure you want to rewind to this message?\n\n"${snippet}"\n\nAll messages underneath this one will be permanently deleted.`
             );
@@ -23,7 +20,7 @@ async function performRewind(messageIndex) {
         }
 
         chat.splice(messageIndex + 1);
-        await saveChat();
+        await context.saveChat();
         context.printMessages();
     } catch (err) {
         console.error("[Message Rewind] Rewind Error:", err);
@@ -94,28 +91,25 @@ function injectRewindButtons() {
     }
 }
 
-// 1. Expose functions globally so you can test them in the browser console
-window["st-message-rewind-loaded"] = true;
-window.injectRewindButtons = injectRewindButtons;
-
-// 2. Listen natively to SillyTavern chat events so buttons inject immediately on load/switch
-eventSource.on(event_types.CHAT_CHANGED, () => setTimeout(injectRewindButtons, 100));
-eventSource.on(event_types.MESSAGE_RECEIVED, () => setTimeout(injectRewindButtons, 100));
-eventSource.on(event_types.MESSAGE_SENT, () => setTimeout(injectRewindButtons, 100));
-
-// 3. Safe document-level observer fallback
 jQuery(async () => {
     console.log("[Message Rewind] Loaded successfully");
 
+    const context = SillyTavern.getContext();
+
+    // Listen to native SillyTavern event emitters so buttons inject reliably on chat load/update
+    if (context.eventSource && context.event_types) {
+        context.eventSource.on(context.event_types.CHAT_CHANGED, () => setTimeout(injectRewindButtons, 100));
+        context.eventSource.on(context.event_types.MESSAGE_RECEIVED, () => setTimeout(injectRewindButtons, 100));
+        context.eventSource.on(context.event_types.MESSAGE_SENT, () => setTimeout(injectRewindButtons, 100));
+    }
+
+    // DOM Observer fallback for themes or custom layouts
     const chatContainer = document.getElementById("chat") || document.body;
     const observer = new MutationObserver(() => {
         injectRewindButtons();
     });
-
     observer.observe(chatContainer, { childList: true, subtree: true });
 
-    // Staggered checks for initial page load
-    injectRewindButtons();
+    // Initial check
     setTimeout(injectRewindButtons, 500);
-    setTimeout(injectRewindButtons, 1500);
 });
