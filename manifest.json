@@ -4,5 +4,5 @@
   "version": "1.0.0",
   "author": "Kipzi",
   "description": "Adds a rewind button under every message to delete subsequent messages with confirmation.",
-  "entry": "index.js"
+  "js": "index.js"
 }
