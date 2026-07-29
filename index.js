@@ -1,3 +1,4 @@
+console.log("[Message Rewind] Loaded");
 import { getContext, extension_settings } from "../../extensions.js";
 import { saveChat } from "../../script.js";
 
