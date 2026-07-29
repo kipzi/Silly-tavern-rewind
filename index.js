@@ -23,6 +23,7 @@ async function performRewind(messageIndex) {
 
         chat.splice(messageIndex + 1);
         await saveChat();
+        context.printMessages(); // Required to redraw the chat UI after splicing
     } catch (err) {
         console.error("[Message Rewind] Error:", err);
     }
@@ -30,15 +31,16 @@ async function performRewind(messageIndex) {
 
 function injectRewindButtons() {
     try {
-        const messageBlocks = document.querySelectorAll(".mes_block");
+        // Target .mes directly to ensure compatibility across all layouts
+        const messageBlocks = document.querySelectorAll(".mes");
 
         messageBlocks.forEach((block) => {
             if (block.querySelector(".rewind-btn-custom")) return;
 
-            const idElement = block.parentElement.querySelector(".mesIDDisplay");
-            if (!idElement) return;
-
-            const messageId = parseInt(idElement.textContent.replace("#", ""), 10);
+            // Grab the ID directly from the attribute instead of looking for .mesIDDisplay
+            const messageIdStr = block.getAttribute("mesid") || block.getAttribute("data-mesid");
+            if (messageIdStr === null) return;
+            const messageId = parseInt(messageIdStr, 10);
             if (isNaN(messageId)) return;
 
             let bottomBar = block.querySelector(".mes-bottom-toolbar");
