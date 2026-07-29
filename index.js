@@ -11,10 +11,80 @@ async function performRewind(messageIndex) {
         const settings = (context.extensionSettings && context.extensionSettings[extensionName]) || DEFAULT_SETTINGS;
 
         if (settings.requireConfirmation) {
-            const snippet = chat[messageIndex].mes.slice(0, 40);
-            const confirmed = window.confirm(
-                `Rewind to this message?\n\n"${snippet}"\n\nMessages after this point will be removed.`
-            );
+            const snippet = chat[messageIndex].mes ? chat[messageIndex].mes.slice(0, 80) : "";
+            
+            // Custom aesthetic modal confirmation dialog
+            const confirmed = await new Promise((resolve) => {
+                const overlay = document.createElement("div");
+                overlay.style.position = "fixed";
+                overlay.style.top = "0";
+                overlay.style.left = "0";
+                overlay.style.width = "100vw";
+                overlay.style.height = "100vh";
+                overlay.style.backgroundColor = "rgba(0, 0, 0, 0.6)";
+                overlay.style.backdropFilter = "blur(4px)";
+                overlay.style.zIndex = "999999";
+                overlay.style.display = "flex";
+                overlay.style.alignItems = "center";
+                overlay.style.justifyContent = "center";
+                overlay.style.opacity = "0";
+                overlay.style.transition = "opacity 0.25s ease";
+
+                const modal = document.createElement("div");
+                modal.style.background = "var(--SmartThemeBlurTintColor, rgba(20, 20, 20, 0.85))";
+                modal.style.border = "1px solid rgba(255, 255, 255, 0.1)";
+                modal.style.borderRadius = "12px";
+                modal.style.padding = "24px";
+                modal.style.maxWidth = "400px";
+                modal.style.width = "90%";
+                modal.style.boxShadow = "0 10px 30px rgba(0, 0, 0, 0.5)";
+                modal.style.color = "var(--SmartThemeBodyColor, #e0e0e0)";
+                modal.style.fontFamily = "inherit";
+                modal.style.transform = "scale(0.95)";
+                modal.style.transition = "transform 0.25s ease";
+
+                modal.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px; color: var(--SmartThemeHeaderColor, #fff);">
+                        <i class="fa-solid fa-angles-left" style="font-size: 1.1rem; opacity: 0.8;"></i>
+                        <h3 style="margin: 0; font-size: 1.1rem; font-weight: 600;">Rewind Chat</h3>
+                    </div>
+                    <p style="margin: 0 0 16px 0; font-size: 0.9rem; opacity: 0.85; line-height: 1.4;">
+                        Are you sure you want to rewind to this message? All subsequent messages will be removed.
+                    </p>
+                    <div style="background: rgba(0, 0, 0, 0.2); border-left: 3px solid rgba(255, 255, 255, 0.3); padding: 10px 12px; border-radius: 4px; font-size: 0.850rem; font-style: italic; margin-bottom: 20px; max-height: 80px; overflow: hidden; opacity: 0.9;">
+                        "${snippet}${snippet.length >= 80 ? '...' : ''}"
+                    </div>
+                    <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                        <button id="rewind-cancel-btn" style="background: transparent; border: 1px solid rgba(255, 255, 255, 0.15); color: inherit; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; transition: background 0.2s;">Cancel</button>
+                        <button id="rewind-confirm-btn" style="background: var(--SmartThemeAccentColor, #4a6fa5); border: none; color: #fff; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 500; transition: opacity 0.2s;">Rewind</button>
+                    </div>
+                `;
+
+                overlay.appendChild(modal);
+                document.body.appendChild(overlay);
+
+                // Trigger smooth fade-in animation
+                requestAnimationFrame(() => {
+                    overlay.style.opacity = "1";
+                    modal.style.transform = "scale(1)";
+                });
+
+                const closeModal = (result) => {
+                    overlay.style.opacity = "0";
+                    modal.style.transform = "scale(0.95)";
+                    setTimeout(() => {
+                        overlay.remove();
+                        resolve(result);
+                    }, 250);
+                };
+
+                modal.querySelector("#rewind-cancel-btn").addEventListener("click", () => closeModal(false));
+                modal.querySelector("#rewind-confirm-btn").addEventListener("click", () => closeModal(true));
+                overlay.addEventListener("click", (e) => {
+                    if (e.target === overlay) closeModal(false);
+                });
+            });
+
             if (!confirmed) return;
         }
 
@@ -26,10 +96,6 @@ async function performRewind(messageIndex) {
     }
 }
 
-/**
- * Calculates the relative luminance of an element's background color 
- * to automatically adapt the icon color for light or dark themes.
- */
 function getAdaptiveColor(element) {
     let current = element;
     while (current && current !== document.body) {
@@ -40,15 +106,13 @@ function getAdaptiveColor(element) {
                 const r = parseInt(rgb[0], 10);
                 const g = parseInt(rgb[1], 10);
                 const b = parseInt(rgb[2], 10);
-                // Standard perceived luminance formula
                 const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-                // If the background is bright/light, return a dark grey icon; otherwise light grey
                 return luminance > 0.5 ? '#404040' : '#b0b0b0';
             }
         }
         current = current.parentElement;
     }
-    return '#b0b0b0'; // Fallback default
+    return '#b0b0b0';
 }
 
 function injectRewindButtons() {
