@@ -23,7 +23,7 @@ async function performRewind(messageIndex) {
 
         chat.splice(messageIndex + 1);
         await saveChat();
-        context.printMessages(); // Redraws the chat UI
+        context.printMessages();
     } catch (err) {
         console.error("[Message Rewind] Error:", err);
     }
@@ -33,9 +33,15 @@ function injectRewindButtons() {
     try {
         const messageBlocks = document.querySelectorAll(".mes");
 
-        // Use 'index' directly as the message ID fallback
-        messageBlocks.forEach((block, index) => {
+        messageBlocks.forEach((block) => {
             if (block.querySelector(".rewind-btn-custom")) return;
+
+            const mesIdStr = block.getAttribute("mesid") || block.getAttribute("data-mesid");
+            // Check strictly for null or empty string so '0' is allowed through
+            if (mesIdStr === "" || mesIdStr === null) return;
+            
+            const messageId = parseInt(mesIdStr, 10);
+            if (isNaN(messageId)) return;
 
             let bottomBar = block.querySelector(".mes-bottom-toolbar");
             if (!bottomBar) {
@@ -75,8 +81,7 @@ function injectRewindButtons() {
 
             rewindButton.addEventListener("click", (e) => {
                 e.stopPropagation();
-                // Passes the loop index as the message ID
-                performRewind(index);
+                performRewind(messageId);
             });
 
             bottomBar.appendChild(rewindButton);
