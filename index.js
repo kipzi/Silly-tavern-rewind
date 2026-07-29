@@ -38,26 +38,27 @@ function injectRewindButtons() {
             const messageId = parseInt(messageIdStr, 10);
             if (isNaN(messageId)) return;
 
-            let bottomBar = block.querySelector(".mes-bottom-toolbar");
+            // Find or create the bottom toolbar of the message container block itself
+            let bottomBar = block.querySelector(".mes_actions") || block.querySelector(".extraMesButtons");
             if (!bottomBar) {
                 bottomBar = document.createElement("div");
-                bottomBar.className = "mes-bottom-toolbar";
+                bottomBar.className = "extraMesButtons";
                 bottomBar.style.display = "flex";
                 bottomBar.style.justifyContent = "flex-end";
                 bottomBar.style.alignItems = "center";
                 bottomBar.style.gap = "8px";
-                bottomBar.style.marginTop = "10px";
-                bottomBar.style.paddingTop = "6px";
-                bottomBar.style.borderTop = "1px solid rgba(255, 255, 255, 0.05)";
+                bottomBar.style.marginTop = "6px";
+                bottomBar.style.width = "100%";
                 block.appendChild(bottomBar);
             }
 
             const rewindButton = document.createElement("button");
-            rewindButton.className = "rewind-btn-custom";
+            rewindButton.className = "rewind-btn-custom menu_button";
             rewindButton.innerHTML = '<i class="fa-solid fa-clock-rotate-left"></i>';
             rewindButton.title = "Rewind to this message";
             rewindButton.style.background = "transparent";
             rewindButton.style.border = "none";
+            rewindButton.style.boxShadow = "none";
             rewindButton.style.color = "#b0b0b0";
             rewindButton.style.padding = "4px";
             rewindButton.style.fontSize = "0.85rem";
