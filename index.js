@@ -125,24 +125,22 @@ function injectRewindButtons() {
             const messageId = parseInt(messageIdStr, 10);
             if (isNaN(messageId)) return;
 
-            let bottomBar = block.querySelector(".mes-bottom-toolbar");
+            // Look inside the message block for SillyTavern's native footer action area
+            let bottomBar = block.querySelector(".mes_actions");
             if (!bottomBar) {
                 bottomBar = document.createElement("div");
-                bottomBar.className = "mes-bottom-toolbar";
+                bottomBar.className = "mes_actions";
                 bottomBar.style.display = "flex";
-                bottomBar.style.justifyContent = "flex-start"; // Forces left alignment
                 bottomBar.style.alignItems = "center";
                 bottomBar.style.gap = "8px";
-                bottomBar.style.marginTop = "10px";
-                bottomBar.style.paddingTop = "6px";
-                bottomBar.style.borderTop = "1px solid rgba(255, 255, 255, 0.05)";
-                bottomBar.style.width = "100%";
-                bottomBar.style.position = "relative";
-                block.appendChild(bottomBar);
-            } else {
-                bottomBar.style.setProperty("justify-content", "flex-start", "important");
+                bottomBar.style.marginTop = "8px";
                 block.appendChild(bottomBar);
             }
+
+            // Force flex properties so it aligns left with no center interference
+            bottomBar.style.setProperty("display", "flex", "important");
+            bottomBar.style.setProperty("justify-content", "flex-start", "important");
+            bottomBar.style.setProperty("flex-direction", "row", "important");
 
             const baseColor = getAdaptiveColor(block);
             const hoverColor = baseColor === '#404040' ? '#000000' : '#ffffff';
@@ -159,9 +157,11 @@ function injectRewindButtons() {
             rewindButton.style.fontSize = "0.85rem";
             rewindButton.style.cursor = "pointer";
             rewindButton.style.transition = "color 0.2s ease";
-            // Explicitly pin to the left with your 10px offset, clearing any auto margins
-            rewindButton.style.marginLeft = "10px";
-            rewindButton.style.marginRight = "0px";
+            
+            // Hardcode order to absolute first so it sits on the extreme left of the action bar
+            rewindButton.style.order = "-9999";
+            rewindButton.style.marginLeft = "0px";
+            rewindButton.style.marginRight = "auto";
 
             rewindButton.addEventListener("mouseenter", () => {
                 rewindButton.style.color = hoverColor;
@@ -176,7 +176,7 @@ function injectRewindButtons() {
                 performRewind(messageId);
             });
 
-            bottomBar.appendChild(rewindButton);
+            bottomBar.prepend(rewindButton);
         });
     } catch (err) {
         console.error("[Message Rewind] Injection Error:", err);
