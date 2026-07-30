@@ -147,7 +147,7 @@ function injectRewindButtons() {
 
             const rewindButton = document.createElement("button");
             rewindButton.className = "rewind-btn-custom";
-           rewindButton.innerHTML = '<i class="fa-solid fa-angles-left"></i>';
+            rewindButton.innerHTML = '<i class="fa-solid fa-angles-left" style="margin: 10px;"></i>';
             rewindButton.title = "Rewind to this message";
             rewindButton.style.background = "transparent";
             rewindButton.style.border = "none";
@@ -161,7 +161,6 @@ function injectRewindButtons() {
             // Hardcode order to absolute first so it sits on the extreme left of the action bar
             rewindButton.style.order = "-9999";
             rewindButton.style.marginLeft = "0px";
-            rewindButton.style.marginRight = "auto";
 
             rewindButton.addEventListener("mouseenter", () => {
                 rewindButton.style.color = hoverColor;
