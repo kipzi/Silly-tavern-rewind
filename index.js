@@ -132,7 +132,6 @@ function injectRewindButtons() {
                 block.appendChild(bottomBar);
             }
 
-            // Ensure clean layout classes/styles without interfering with block pointer events or editing layers
             bottomBar.style.setProperty("display", "flex", "important");
             bottomBar.style.setProperty("align-items", "center", "important");
             bottomBar.style.setProperty("justify-content", "flex-start", "important");
@@ -148,7 +147,6 @@ function injectRewindButtons() {
             rewindButton.innerHTML = '<i class="fa-solid fa-angles-left"></i>';
             rewindButton.title = "Rewind to this message";
             
-            // Match native SillyTavern action button styling footprint to prevent hit-box bleeding
             rewindButton.style.background = "transparent";
             rewindButton.style.border = "none";
             rewindButton.style.boxShadow = "none";
