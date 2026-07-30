@@ -125,42 +125,43 @@ function injectRewindButtons() {
             const messageId = parseInt(messageIdStr, 10);
             if (isNaN(messageId)) return;
 
-            // Look inside the message block for SillyTavern's native footer action area
             let bottomBar = block.querySelector(".mes_actions");
             if (!bottomBar) {
                 bottomBar = document.createElement("div");
                 bottomBar.className = "mes_actions";
-                bottomBar.style.display = "flex";
-                bottomBar.style.alignItems = "center";
-                bottomBar.style.gap = "8px";
-                bottomBar.style.marginTop = "8px";
                 block.appendChild(bottomBar);
             }
 
-            // Force flex properties so it aligns left with no center interference
+            // Ensure clean layout classes/styles without interfering with block pointer events or editing layers
             bottomBar.style.setProperty("display", "flex", "important");
+            bottomBar.style.setProperty("align-items", "center", "important");
             bottomBar.style.setProperty("justify-content", "flex-start", "important");
             bottomBar.style.setProperty("flex-direction", "row", "important");
+            bottomBar.style.setProperty("flex-wrap", "wrap", "important");
+            bottomBar.style.setProperty("gap", "8px", "important");
 
             const baseColor = getAdaptiveColor(block);
             const hoverColor = baseColor === '#404040' ? '#000000' : '#ffffff';
 
-            const rewindButton = document.createElement("button");
-            rewindButton.className = "rewind-btn-custom";
-            rewindButton.innerHTML = '<i class="fa-solid fa-angles-left" style="margin: 10px;"></i>';
+            const rewindButton = document.createElement("div");
+            rewindButton.className = "mes_button rewind-btn-custom";
+            rewindButton.innerHTML = '<i class="fa-solid fa-angles-left"></i>';
             rewindButton.title = "Rewind to this message";
+            
+            // Match native SillyTavern action button styling footprint to prevent hit-box bleeding
             rewindButton.style.background = "transparent";
             rewindButton.style.border = "none";
             rewindButton.style.boxShadow = "none";
             rewindButton.style.color = baseColor;
-            rewindButton.style.padding = "4px";
+            rewindButton.style.display = "flex";
+            rewindButton.style.alignItems = "center";
+            rewindButton.style.justifyContent = "center";
+            rewindButton.style.padding = "4px 6px";
             rewindButton.style.fontSize = "0.85rem";
             rewindButton.style.cursor = "pointer";
             rewindButton.style.transition = "color 0.2s ease";
-            
-            // Hardcode order to absolute first so it sits on the extreme left of the action bar
             rewindButton.style.order = "-9999";
-            rewindButton.style.marginLeft = "0px";
+            rewindButton.style.margin = "0";
 
             rewindButton.addEventListener("mouseenter", () => {
                 rewindButton.style.color = hoverColor;
@@ -175,7 +176,7 @@ function injectRewindButtons() {
                 performRewind(messageId);
             });
 
-            bottomBar.prepend(rewindButton);
+            block.insertBefore(rewindButton, bottomBar);
         });
     } catch (err) {
         console.error("[Message Rewind] Injection Error:", err);
